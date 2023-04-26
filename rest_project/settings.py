@@ -29,12 +29,20 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     'django.contrib.staticfiles',
     'rest_framework',
+    "django_elasticsearch_dsl",
+    "django_elasticsearch_dsl_drf",
     'rest_app',
     
 ]
 
 
 # Elasticsearch
+ELASTICSEARCH_DSL = {
+    "default": {"hosts": "elasticsearch:9200"},
+}
+
+
+ELASTICSEARCH_DSL_SIGNAL_PROCESSOR = 'django_elasticsearch_dsl.signals.RealTimeSignalProcessor' #This (optional) setting controls what SignalProcessor class is used to handle Django’s signals and keep the search index up-to-date.
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -142,7 +150,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework_json_api.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer'
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
     'DEFAULT_FILTER_BACKENDS': (

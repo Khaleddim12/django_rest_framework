@@ -20,7 +20,7 @@ services:
     volumes:
       - .:/django
       - staticfiles:/django/staticfiles
-      - media:/django/media
+      - media:/django/mediafiles
     ports:
       - 8000:8000
     image: rest_app:django
@@ -36,7 +36,7 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - staticfiles:/staticfiles
-      - media:/media
+      - media:/mediafiles
     ports:
       - 80:80
     depends_on:

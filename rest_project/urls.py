@@ -23,5 +23,5 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path('admin/', admin.site.urls),
-    path('employee/', include('rest_app.urls')),
+    path('product/', include('rest_app.urls')),
 ]

@@ -24,7 +24,5 @@ RUN python manage.py collectstatic --noinput
 RUN python manage.py makemigrations
 RUN python manage.py makemigrations rest_app
 
-RUN python manage.py migrate
-
-# copy project
-COPY . .
+# run migrations at the end
+CMD python manage.py migrate && python manage.py search_index --rebuild

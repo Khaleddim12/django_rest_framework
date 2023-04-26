@@ -1,22 +1,21 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
-from .models import Employee
+from .models import Product
 
 @registry.register_document
-class EmployeeDocument(Document):
+class ProductDocument(Document):
     class Index:
-        name = 'employees'
+        name = 'products'
         settings = {
             'number_of_shards': 1,
             'number_of_replicas': 0,
         }
     class Django:
-        model = Employee
+        model = Product
         fields = [
-            'id',
             'name',
-            'salary'
+            'price',
         ]
         
 # Ignore auto updating of Elasticsearch when a model is saved
