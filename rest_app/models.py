@@ -1,12 +1,9 @@
-from django.db import models, transaction
+from django.db import models
 
-# Create your models here.
 
 class Product(models.Model):
-    name = models.CharField(max_length=255)
-    price = models.FloatField()
-    image = models.ImageField(upload_to="images/products/original",null=True, blank=True)
-    thumbnail = models.ImageField(upload_to="images/products/thumbnail", null=True, blank=True)
+    title = models.CharField(max_length=100)
+    price = models.FloatField(default=50.0)
     
     def __str__(self):
-        return self.name
+        return self.title

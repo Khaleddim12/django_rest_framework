@@ -26,3 +26,4 @@ RUN python manage.py makemigrations rest_app
 
 # run migrations at the end
 CMD python manage.py migrate && python manage.py search_index --rebuild
+COPY . .
