@@ -10,28 +10,16 @@ from .serializers import ProductDocumentSerializer
 from .models import Product
 from .documents import ProductDocument
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-
-from django_elasticsearch_dsl_drf.constants import (
-    LOOKUP_FILTER_RANGE,
-    LOOKUP_QUERY_GT,
-    LOOKUP_QUERY_GTE,
-    LOOKUP_QUERY_IN,
-    LOOKUP_QUERY_LT,
-    LOOKUP_QUERY_LTE,
-    SUGGESTER_COMPLETION,
-)
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
-    FacetedSearchFilterBackend,
     FilteringFilterBackend,
     SearchFilterBackend,
-    SuggesterFilterBackend,
-    SimpleQueryStringSearchFilterBackend
 )
-
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-
-# Create your views here.
+from elasticsearch_dsl.query import Q
+from .documents import ProductDocument
+from .models import Product
+from .serializers import ProductDocumentSerializer
 
 
 class ProductViewSet(DocumentViewSet):
@@ -39,44 +27,42 @@ class ProductViewSet(DocumentViewSet):
     serializer_class = ProductDocumentSerializer
     ordering = ('id',)
     lookup_field = 'id'
-    
     filter_backends = [
         DefaultOrderingFilterBackend,
         FilteringFilterBackend,
-        SimpleQueryStringSearchFilterBackend,
+        SearchFilterBackend,
     ]
-    
-    search_fields = (
-        'title',        
-    )
-    
+    search_fields = {
+        'title': {
+            'field': 'title',
+            'suggester': {
+                # Use completion suggester for better suggestions
+                'name': 'title_suggest',
+                'term': {
+                    # Suggestion text will be a prefix of user entry,
+                    # this will help to match more relevant suggestion.
+                    'field': 'title.suggest',
+                    'size': 5,
+                    'skip_duplicates': True,
+                },
+            },
+        },
+    }
     filter_fields = {
         'id': 'id',
         'title': 'title',
         'price': {
             'field': 'price',
             'lookups': [
-                LOOKUP_FILTER_RANGE,
-                LOOKUP_QUERY_IN,
-                LOOKUP_QUERY_GT,
-                LOOKUP_QUERY_GTE,
-                LOOKUP_QUERY_LT,
-                LOOKUP_QUERY_LTE,
-            ],
-        }
-    }
-    
-    suggester_fields = {
-        'title_suggest': {
-            'field': 'title.suggest',
-            'suggesters': [
-                SUGGESTER_COMPLETION,
+                'range',
+                'in',
+                'gt',
+                'gte',
+                'lt',
+                'lte',
             ],
         },
     }
-
-
-# Create your views here.
 
 
 @api_view(['GET', 'POST'])
