@@ -5,64 +5,77 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import parser_classes
 from rest_framework.decorators import api_view
-
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import ProductDocumentSerializer
 from .models import Product
 from .documents import ProductDocument
-from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+from rest_framework.renderers import JSONRenderer
+
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FilteringFilterBackend,
     SearchFilterBackend,
+    CompoundSearchFilterBackend
 )
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-from elasticsearch_dsl.query import Q
-from .documents import ProductDocument
-from .models import Product
-from .serializers import ProductDocumentSerializer
 
-
-class ProductViewSet(DocumentViewSet):
+from django_elasticsearch_dsl_drf.constants import (
+    LOOKUP_FILTER_TERMS,
+    LOOKUP_QUERY_IN,
+    LOOKUP_QUERY_GT,
+    LOOKUP_QUERY_GTE,
+    LOOKUP_QUERY_LT,
+    LOOKUP_QUERY_LTE,
+)
+class ProductDocumentView(DocumentViewSet):
+    renderer_classes = [JSONRenderer]
     document = ProductDocument
     serializer_class = ProductDocumentSerializer
-    ordering = ('id',)
     lookup_field = 'id'
+
     filter_backends = [
-        DefaultOrderingFilterBackend,
         FilteringFilterBackend,
         SearchFilterBackend,
+        DefaultOrderingFilterBackend,
+        CompoundSearchFilterBackend,
     ]
-    search_fields = {
-        'title': {
-            'field': 'title',
-            'suggester': {
-                # Use completion suggester for better suggestions
-                'name': 'title_suggest',
-                'term': {
-                    # Suggestion text will be a prefix of user entry,
-                    # this will help to match more relevant suggestion.
-                    'field': 'title.suggest',
-                    'size': 5,
-                    'skip_duplicates': True,
-                },
-            },
-        },
-    }
+
+    search_fields = (
+        'title',
+    )
+
     filter_fields = {
-        'id': 'id',
-        'title': 'title',
-        'price': {
-            'field': 'price',
+        'id': {
+            'field': 'id',
             'lookups': [
-                'range',
-                'in',
-                'gt',
-                'gte',
-                'lt',
-                'lte',
+                LOOKUP_FILTER_TERMS,
+                LOOKUP_QUERY_IN,
+                LOOKUP_QUERY_GT,
+                LOOKUP_QUERY_GTE,
+                LOOKUP_QUERY_LT,
+                LOOKUP_QUERY_LTE,
             ],
         },
+        'title': 'title',
+        'price': 'price',
     }
+
+    ordering_fields = {
+        'id': 'id',
+        'title': 'title',
+        'price': 'price',
+    }
+
+    ordering = ('id',)
+
+    def list(self, request, *args, **kwargs):
+        queryset = Product.objects.all()
+        self.kwargs['queryset'] = queryset
+        return super().list(request, *args, **kwargs)
+
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
 
 @api_view(['GET', 'POST'])
