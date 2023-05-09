@@ -1,15 +1,14 @@
 from django.urls import path
+from .views import Product_get_post, Product_pk, ProductSearch, ProductDocumentViewSet
 from rest_framework import routers
 
-from .views import Product_get_post, Product_pk, ProductDocumentView
+router = routers.DefaultRouter()
 
-router = routers.SimpleRouter(trailing_slash=False)
-
-router.register(r'search', ProductDocumentView, basename='search')
-
+router.register('products', ProductDocumentViewSet, basename='product')
 urlpatterns = [
-    path('',Product_get_post),
-    path('<int:pk>',Product_pk),
-    
+    path('', Product_get_post),
+    path('<int:pk>', Product_pk),
+    path('search/<str:query>/', ProductSearch.as_view()),
 ]
+
 urlpatterns += router.urls
