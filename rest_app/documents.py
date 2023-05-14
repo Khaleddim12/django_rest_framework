@@ -1,14 +1,27 @@
-from django_elasticsearch_dsl import Document, fields
-from django_elasticsearch_dsl.registries import registry
-
+from django_elasticsearch_dsl import Document, fields, Index
 from .models import Product
+from django_elasticsearch_dsl.registries import registry
 
 
 @registry.register_document
 class ProductDocument(Document):
+    title = fields.TextField(
+        attr="title",
+        fields={
+            "raw": fields.TextField(),
+            "suggest": fields.CompletionField(),
+        },
+    )
+    price = fields.IntegerField(
+        attr="price",
+        fields={
+            "raw": fields.IntegerField(),
+        },
+    )
+
     class Index:
-        name = "products"
-        settings = {"number_of_shards": 1, "number_of_replicas": 0}
+        name = "product"
 
     class Django:
         model = Product
+        

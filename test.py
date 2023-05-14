@@ -11,20 +11,16 @@ django.setup()
 from rest_app.models import Product
 from rest_app.documents import ProductDocument
 
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
+from elasticsearch_dsl.query import Q
 
-product = Product(name='marwan', salary="100000000")
-product.save()
+client = Elasticsearch()
 
-productdoc = ProductDocument.search().filter("term", name = "khaled")
+def get_products_with_high_prices():
+    s = Search(using=client, index="product")
+    s = s.filter("range", price={"gt": 10000})
+    response = s.execute()
+    return response.to_dict()["hits"]["hits"]
 
-""" for hit in empdoc:
-    print(
-        "product name : {}, salary {}".format(hit.name, hit.salary)
-    )
-     """
-
-#convert the elastisearch result into a real django queryset
-qs = productdoc.to_queryset()
-
-for prod in qs:
-    print(prod.name)
+print(get_products_with_high_prices())

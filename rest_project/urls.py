@@ -5,7 +5,8 @@ from rest_framework import routers
 from rest_app.views import ProductDocumentViewSet
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('products/', include('rest_app.urls'))
+    path('', include('rest_app.urls'))
 ]
